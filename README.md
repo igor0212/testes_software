@@ -21,7 +21,6 @@ O teste desse método é o seguinte:
   
 public void TestStackAndExtras()
 {
-    // No stacking here because there is no part/disc/etc
     var files = new[]
     {
         "Harry Potter and the Deathly Hallows/Part 1.mp3",
@@ -77,10 +76,45 @@ public void TestStackAndExtras()
   
 Neste método, recebos um arquivo com as informações dos audiobooks separadas, então separamos essas informações e retornamos de forma organizada.
 O teste valida o nome do audiobook e quantos arquivos (extras ou não) possui.
+
+    
+
+Exemplo 2:
+
+Jellyfin implementa uma classe chamada ItemImageProvider que oferece métodos utilitários para gerenciar imagens anexadas a itens. Dentre eles, temos o seguindo método:
+
+public bool ValidateImages(BaseItem item, IEnumerable<IImageProvider> providers, IDirectoryService directoryService)
+
+Ele verifica se as imagens existentes têm caminhos válidos e adiciona todas as novas imagens locais fornecidas.
+
+O teste desse método é o seguinte:
+
+private static TheoryData<ImageType, int> GetImageTypesWithCount()
+{
+	var theoryTypes = new TheoryData<ImageType, int>
+	{
+		// minimal test cases that hit different handling
+		{ ImageType.Primary, 1 },
+		{ ImageType.Backdrop, 1 },
+		{ ImageType.Backdrop, 2 }
+	};
+
+	return theoryTypes;
+}
+
+public void ValidateImages_PopulatedItemWithBadPathsAndEmptyProviders_RemovesImage(ImageType imageType, int imageCount)
+{
+	var item = GetItemWithImages(imageType, imageCount, false);
+
+	var itemImageProvider = GetItemImageProvider(null, null);
+	var changed = itemImageProvider.ValidateImages(item, Enumerable.Empty<ILocalImageProvider>(), null);
+
+	Assert.True(changed);
+	Assert.Empty(item.GetImages(imageType));
+}
+
+Neste método, ele recebe um tipo de imagem e quantas imagens são. Realiza a tranformação para o objeto requisitado (ItemImageProvider) e valida se a imagem e a quantidade estão corretas.
   
- 
-
-
 
 
 

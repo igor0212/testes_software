@@ -3,7 +3,7 @@ Trabalho Prático sobre Testes de Software
 Igor Oliveira Valente da Silveira
 2017105575
 
-Jellyfin https://github.com/jellyfin/jellyfin)
+Jellyfin (https://github.com/jellyfin/jellyfin)
 
 Jellyfin é um sistema de mídia de software livre que permite que você controle o gerenciamento e o streaming de sua mídia. 
 

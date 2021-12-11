@@ -114,8 +114,51 @@ public void ValidateImages_PopulatedItemWithBadPathsAndEmptyProviders_RemovesIma
 }
 
 Neste método, ele recebe um tipo de imagem e quantas imagens são. Realiza a tranformação para o objeto requisitado (ItemImageProvider) e valida se a imagem e a quantidade estão corretas.
-  
+	
 
+Exemplo 3:
+	
+Jellyfin implementa uma classe chamada SubtitleResolver que oferece métodos para resolver legendas externas para vídeos. Dentre eles, temos o seguinte método:
 
+public void AddExternalSubtitleStreams(
+            List<MediaStream> streams,
+            string videoPath,
+            int startIndex,
+            IReadOnlyList<string> files)
+	
+Ele extrai os arquivos de legenda da lista fornecida e os adiciona à lista de fluxos. 
 
+O teste desse método é o seguinte:
+	
+[Theory]
+[InlineData("/video/My Video.mkv", "/video/My Video.srt", "srt", null, false, false)]
+[InlineData("/video/My.Video.mkv", "/video/My.Video.srt", "srt", null, false, false)]
+[InlineData("/video/My.Video.mkv", "/video/My.Video.foreign.srt", "srt", null, true, false)]
+[InlineData("/video/My Video.mkv", "/video/My Video.forced.srt", "srt", null, true, false)]
+[InlineData("/video/My.Video.mkv", "/video/My.Video.default.srt", "srt", null, false, true)]
+[InlineData("/video/My.Video.mkv", "/video/My.Video.forced.default.srt", "srt", null, true, true)]
+[InlineData("/video/My.Video.mkv", "/video/My.Video.en.srt", "srt", "en", false, false)]
+[InlineData("/video/My.Video.mkv", "/video/My.Video.default.en.srt", "srt", "en", false, true)]
+[InlineData("/video/My.Video.mkv", "/video/My.Video.default.forced.en.srt", "srt", "en", true, true)]
+[InlineData("/video/My.Video.mkv", "/video/My.Video.en.default.forced.srt", "srt", "en", true, true)]
+public void AddExternalSubtitleStreams_GivenSingleFile_ReturnsExpectedSubtitle(string videoPath, string file, string codec, string? language, bool isForced, bool isDefault)
+{
+	var streams = new List<MediaStream>();
+	var expected = CreateMediaStream(file, codec, language, 0, isForced, isDefault);
 
+	new SubtitleResolver(Mock.Of<ILocalizationManager>()).AddExternalSubtitleStreams(streams, videoPath, 0, new[] { file });
+
+	Assert.Single(streams);
+
+	var actual = streams[0];
+
+	Assert.Equal(expected.Index, actual.Index);
+	Assert.Equal(expected.Type, actual.Type);
+	Assert.Equal(expected.IsExternal, actual.IsExternal);
+	Assert.Equal(expected.Path, actual.Path);
+	Assert.Equal(expected.IsDefault, actual.IsDefault);
+	Assert.Equal(expected.IsForced, actual.IsForced);
+	Assert.Equal(expected.Language, actual.Language);
+}
+	
+Neste método, ele recebe o caminho do vídeo, o codec, a linguagem, entre outras informações. Com isso, adiciona a legenda e compara as informações do resultado atual com as informações do resultado esperado.
